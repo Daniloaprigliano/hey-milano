@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hey Milano in numeri — Dashboard del percorso</title>
+  <meta name="description" content="Dashboard interna di Hey Milano. I numeri del percorso, le assemblee, i contributi raccolti e i temi emersi verso il Congresso per la Città del 23 maggio 2026 all'Ambrosianeum." />
+  <meta name="robots" content="noindex,nofollow" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Archivo:ital,wght@0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+
+  <!-- Stili -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <!-- Favicon: stesso fumetto del logo -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70'><path fill='%23000' d='M5 30 Q5 5 30 5 L70 5 Q95 5 95 30 Q95 50 75 55 L60 55 L50 68 L50 55 L30 55 Q5 55 5 30 Z'/><path fill='%23ED9220' d='M95 30 Q95 5 70 5 L70 12 Q88 12 88 30 Q88 48 72 50 L62 50 L55 60 L55 50 L70 50 Q95 50 95 30 Z'/></svg>" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#top" class="brand" aria-label="Hey Milano — Dashboard">
+        <!-- Logo SVG ricostruito (fumetto nero + arancione) -->
+        <svg class="brand-logo" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#000000" d="M5 30 Q5 5 30 5 L70 5 Q95 5 95 30 Q95 50 75 55 L60 55 L50 68 L50 55 L30 55 Q5 55 5 30 Z"/>
+          <path fill="#ED9220" d="M95 30 Q95 5 70 5 L70 12 Q88 12 88 30 Q88 48 72 50 L62 50 L55 60 L55 50 L70 50 Q95 50 95 30 Z"/>
+        </svg>
+        <span class="brand-text">
+          <strong>Hey Milano</strong>
+          <span>Dashboard del percorso</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Navigazione principale">
+        <a href="#numeri">Numeri</a>
+        <a href="#assemblee">Assemblee</a>
+        <a href="#contributi">Contributi</a>
+        <a href="#temi">Temi</a>
+        <a href="#congresso">Congresso</a>
+        <a class="btn" href="https://www.heymilano.it" target="_blank" rel="noopener">heymilano.it →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="hero-eyebrow">Aggiornato al <span id="meta-data"></span></div>
+      <h1 class="hero-title">Hey Milano,<br/><em>i numeri del percorso.</em></h1>
+      <p class="hero-sub">
+        Dashboard interna del Comitato Promotore. Tutti i numeri delle assemblee diffuse,
+        i contributi raccolti dalla città e i temi che stiamo costruendo insieme verso
+        il Congresso per la Città di sabato 23 maggio 2026 all'Ambrosianeum.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#assemblee">Vai alle assemblee</a>
+        <a class="btn btn-ghost" href="#contributi">Vedi i contributi</a>
+        <a class="btn btn-ghost" id="cta-workspace" href="#" target="_blank" rel="noopener">Apri workspace Notion ↗</a>
+      </div>
+    </section>
+
+    <!-- ===== KPI ===== -->
+    <section class="section" id="numeri">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">01 — I numeri</p>
+          <h2 class="section-title">Le assemblee in cifre.</h2>
+        </div>
+        <p class="section-desc">Stato attuale del percorso. I dati sono sincronizzati con il database <em>Assemblee</em> del workspace Notion del Centro Studi Caldara.</p>
+      </div>
+
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Distribuzione per stato</h3>
+          <p>Dove si trova ogni assemblea nel percorso.</p>
+          <div class="chart-wrap"><canvas id="chart-stato"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Realtà più attive</h3>
+          <p>Top promotori per numero di assemblee organizzate.</p>
+          <div class="chart-wrap"><canvas id="chart-promotori"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ASSEMBLEE ===== -->
+    <section class="section" id="assemblee">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">02 — Le assemblee</p>
+          <h2 class="section-title">Tutte le assemblee, una a una.</h2>
+        </div>
+        <p class="section-desc">Clicca sul titolo per aprire la pagina Notion dell'assemblea. I contributi collegati appaiono sotto ogni voce. Filtra per stato.</p>
+      </div>
+
+      <div class="filter-bar" id="filter-bar"></div>
+
+      <div class="assemblea-list" id="assemblea-list"></div>
+    </section>
+
+    <!-- ===== TEMI ===== -->
+    <section class="section" id="temi">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">03 — I temi</p>
+          <h2 class="section-title">Cosa sta emergendo.</h2>
+        </div>
+        <p class="section-desc">Ogni assemblea e ogni contributo è classificato per uno o più temi. Il numero indica quante volte il tema è stato toccato in tutto il percorso (assemblee + contributi).</p>
+      </div>
+
+      <div class="chart-card" style="margin-bottom: 32px;">
+        <h3>Frequenza dei temi nel percorso</h3>
+        <p>Numero di assemblee e contributi che toccano ciascun tema (un'assemblea può toccare più temi).</p>
+        <div class="theme-list" id="theme-list"></div>
+      </div>
+
+      <div class="themes-grid" id="themes-grid"></div>
+    </section>
+
+    <!-- ===== CONTRIBUTI ===== -->
+    <section class="section" id="contributi">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">04 — I contributi</p>
+          <h2 class="section-title">Il registro completo.</h2>
+        </div>
+        <p class="section-desc">Tutti i contributi raccolti (vocali, verbali, documenti) in ordine cronologico. Ogni voce è cliccabile e porta alla pagina Notion del contributo.</p>
+      </div>
+
+      <div class="contrib-list" id="contrib-list"></div>
+    </section>
+
+    <!-- ===== CONGRESSO BANNER ===== -->
+    <section class="section" id="congresso">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">05 — Verso il Congresso</p>
+          <h2 class="section-title">Il punto di arrivo.</h2>
+        </div>
+        <p class="section-desc">Il Congresso per la Città è il momento in cui i contributi raccolti diventano un documento da consegnare a chi si candiderà a governare Milano nel 2027.</p>
+      </div>
+
+      <div class="congresso-banner">
+        <div>
+          <h2>Congresso per <em>la Città</em>.</h2>
+          <p>
+            Sabato 23 maggio 2026, dalle 9.00 alle 13.30, al-l'Ambrosianeum di via delle Ore 3.
+            Documento di sintesi inviato in anticipo, comunicazioni per macro-settore,
+            voto per paragrafi con possibilità di emendamenti. È aperto: l'accreditamento è obbligatorio.
+          </p>
+          <div class="congresso-actions">
+            <a class="btn" href="https://www.heymilano.it/congresso/" target="_blank" rel="noopener">Accreditati →</a>
+            <a class="btn btn-ghost" href="https://www.facebook.com/congressoperlacitta/" target="_blank" rel="noopener">Pagina Facebook</a>
+            <a class="btn btn-ghost" href="https://gofund.me/4f98636fe" target="_blank" rel="noopener">Sostieni il percorso</a>
+          </div>
+        </div>
+        <div class="congresso-banner-data">
+          <div class="day">23</div>
+          <div class="month">Maggio</div>
+          <div class="meta">Sabato · Ambrosianeum · 9.00–13.30</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <div class="footer-brand">Hey Milano, dove andiamo?</div>
+        <p>
+          Iniziativa civica del Circolo e Centro Studi <strong>Emilio Caldara</strong>,
+          via De Amicis 17, Milano. Cento assemblee diffuse, un Congresso per la Città,
+          proposte concrete per Milano 2027.
+        </p>
+        <p style="margin-top: 16px;">
+          <em>Contenuti prima dei nomi, domande prima delle candidature.</em>
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Risorse</h4>
+        <ul>
+          <li><a href="https://www.heymilano.it" target="_blank" rel="noopener">heymilano.it</a></li>
+          <li><a href="https://www.heymilano.it/partecipa/" target="_blank" rel="noopener">Calendario incontri</a></li>
+          <li><a href="https://www.heymilano.it/contributi/" target="_blank" rel="noopener">Contributi pubblici</a></li>
+          <li><a href="https://www.heymilano.it/congresso/" target="_blank" rel="noopener">Accreditamento Congresso</a></li>
+          <li><a href="https://www.facebook.com/congressoperlacitta/" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="https://gofund.me/4f98636fe" target="_blank" rel="noopener">Crowdfunding</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Coordinamento</h4>
+        <ul>
+          <li>Danilo Aprigliano</li>
+          <li>Raffaele Di Tria</li>
+          <li>Mauro Mercatanti — comunicazione</li>
+          <li>Franco D'Alfonso — Caldara</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Circolo e Centro Studi Emilio Caldara · Dashboard interna del Comitato Promotore</span>
+      <span>Dati sincronizzati con il workspace Notion · <a id="footer-data-date" style="color: rgba(255,255,255,.85);"></a></span>
+    </div>
+  </footer>
+
+  <!-- Dati e logica -->
+  <script src="assets/data/data.js"></script>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
