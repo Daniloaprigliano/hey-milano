@@ -7,6 +7,14 @@
   const D = window.HM_DATA;
   if (!D) { console.error('HM_DATA non caricato'); return; }
 
+  // ----- filtro vista -----
+  // Mostriamo solo le assemblee con data certa e stato Svolta o Confermata.
+  // Sono escluse quindi: le ipotesi "Da programmare", le voci con data null,
+  // le annullate. I dati grezzi restano in data.js: il filtro è solo a video.
+  D.assemblee = D.assemblee.filter(a =>
+    a.data && (a.stato === 'Svolta' || a.stato === 'Confermata')
+  );
+
   // ----- helpers -----
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -45,9 +53,9 @@
 
   const kpiHtml = `
     <div class="kpi dark">
-      <div class="kpi-label">Totale assemblee</div>
+      <div class="kpi-label">Assemblee totali</div>
       <div class="kpi-value">${counts.totale}</div>
-      <div class="kpi-meta">tra svolte, confermate e in pipeline</div>
+      <div class="kpi-meta">svolte e confermate</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Svolte</div>
@@ -55,9 +63,9 @@
       <div class="kpi-meta">incontri già realizzati</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Confermate</div>
+      <div class="kpi-label">Prossime in calendario</div>
       <div class="kpi-value">${counts.confermate}</div>
-      <div class="kpi-meta">in calendario nei prossimi giorni</div>
+      <div class="kpi-meta">confermate, fino al Congresso</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Contributi raccolti</div>
@@ -88,10 +96,10 @@
     new Chart($('#chart-stato'), {
       type: 'doughnut',
       data: {
-        labels: ['Svolte', 'Confermate', 'Da programmare', 'Annullate'],
+        labels: ['Svolte', 'Confermate'],
         datasets: [{
-          data: [counts.svolte, counts.confermate, counts.daProgrammare, counts.annullate],
-          backgroundColor: ['#16794D', '#1D4ED8', '#B0B0B0', '#B91C1C'],
+          data: [counts.svolte, counts.confermate],
+          backgroundColor: ['#16794D', '#ED9220'],
           borderColor: '#000',
           borderWidth: 2
         }]
@@ -145,15 +153,14 @@
   drawCharts();
 
   // ----- ASSEMBLEE LIST -----
-  const filterStati = ['Tutte', 'Svolta', 'Confermata', 'Da programmare', 'Annullata'];
+  // Mostriamo solo gli stati con almeno un'assemblea visibile (dopo il filtro iniziale).
+  const filterStati = ['Tutte', 'Svolta', 'Confermata'];
   const filterBar = $('#filter-bar');
   filterBar.innerHTML = filterStati.map((s, i) => `
     <button class="filter-chip ${i === 0 ? 'active' : ''}" data-filter="${s}">
       ${s} ${s === 'Tutte' ? `(${counts.totale})` : `(${
         s === 'Svolta' ? counts.svolte :
-        s === 'Confermata' ? counts.confermate :
-        s === 'Da programmare' ? counts.daProgrammare :
-        counts.annullate
+        s === 'Confermata' ? counts.confermate : 0
       })`}
     </button>
   `).join('');
