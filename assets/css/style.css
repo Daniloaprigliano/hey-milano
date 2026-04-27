@@ -377,6 +377,168 @@ img { max-width: 100%; }
 .spaced { display: flex; gap: 8px; flex-wrap: wrap; }
 .divider { height: 2px; background: var(--ink); margin: 48px 0; max-width: 1280px; margin-left: auto; margin-right: auto; }
 
+/* ===========================================
+   RESPONSIVE — TABLET (≤ 920px)
+   =========================================== */
+@media (max-width: 920px) {
+  .header-inner { flex-wrap: wrap; gap: 14px; padding: 12px 20px; }
+  .nav { gap: 16px; font-size: 13px; }
+  .hero { padding: 48px 20px 24px; }
+  .section { padding: 56px 20px; }
+  .section-head { gap: 16px; margin-bottom: 28px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 52px; }
+}
+
+/* ===========================================
+   RESPONSIVE — MOBILE (≤ 720px)
+   =========================================== */
+@media (max-width: 720px) {
+  /* Header: nav semplificata, btn nasconde testo lungo */
+  .header-inner { padding: 12px 16px; flex-wrap: nowrap; gap: 8px; }
+  .brand-text span { display: none; }
+  .brand-text strong { font-size: 15px; }
+  .brand-logo { width: 40px; height: 28px; }
+  .nav {
+    gap: 0; flex-wrap: nowrap; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    margin-right: -16px; padding-right: 16px;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { font-size: 13px; padding: 6px 10px; white-space: nowrap; flex-shrink: 0; }
+  .nav .btn { padding: 7px 12px; font-size: 12px; flex-shrink: 0; }
+
+  /* Hero */
+  .hero { padding: 36px 16px 20px; }
+  .hero-eyebrow { font-size: 11px; padding: 5px 10px; }
+  .hero-title { font-size: 38px; }
+  .hero-sub { font-size: 15px; }
+  .hero-actions .btn { padding: 9px 14px; font-size: 13px; }
+
+  /* Section */
+  .section { padding: 48px 16px; }
+  .section-title { font-size: 30px; }
+  .section-head { padding-bottom: 16px; margin-bottom: 24px; }
+
+  /* KPI: 2 col, ma più compatto */
+  .kpi { padding: 20px 18px; }
+  .kpi-value { font-size: 44px; margin: 8px 0 4px 0; }
+  .kpi-label { font-size: 10px; }
+  .kpi-meta { font-size: 12px; }
+
+  /* Charts */
+  .chart-card { padding: 20px 18px; }
+  .chart-card h3 { font-size: 17px; }
+  .chart-wrap { height: 260px; }
+
+  /* Filter bar: scroll orizzontale invece che wrap */
+  .filter-bar {
+    flex-wrap: nowrap; overflow-x: auto; max-width: 100%;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip { padding: 9px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+
+  /* Assemblea: layout verticale, status sopra al titolo */
+  .assemblea {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "date body"
+      "status status"
+      "contrib contrib";
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .assemblea-date { grid-area: date; min-width: 56px; padding: 10px; }
+  .assemblea-date .day { font-size: 22px; }
+  .assemblea-body { grid-area: body; }
+  .assemblea-title { font-size: 15px; }
+  .assemblea-meta { font-size: 12px; }
+  .assemblea-status {
+    grid-area: status;
+    justify-self: start;
+    font-size: 10px; padding: 4px 9px;
+  }
+  .assemblea-contributi { grid-area: contrib; }
+  .contrib-link { padding: 8px 10px; gap: 8px; }
+  .contrib-link .titolo { font-size: 13px; }
+  .contrib-link .tipo { font-size: 9px; padding: 2px 6px; }
+
+  /* Theme list: niente colonna fissa, solo una riga compatta */
+  .theme-row { grid-template-columns: 1fr; gap: 6px; }
+  .theme-row .theme-name { padding-left: 10px; font-size: 13px; }
+  .theme-bar { height: 8px; }
+  .theme-count {
+    text-align: left;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: var(--font-sans);
+  }
+  .theme-row { display: grid; grid-template-areas: "name count" "bar bar"; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 6px 0; border-bottom: 1px solid var(--bg-soft); }
+  .theme-row > .theme-name { grid-area: name; }
+  .theme-row > .theme-count { grid-area: count; }
+  .theme-row > .theme-bar { grid-area: bar; margin-top: 4px; }
+
+  /* Themes grid: 2 col su mobile */
+  .themes-grid { grid-template-columns: repeat(2, 1fr); }
+  .theme-card { padding: 14px; }
+  .theme-card-count { font-size: 28px; }
+  .theme-card-title { font-size: 13px; }
+
+  /* Contributi */
+  .contrib-item { padding: 18px 18px; }
+  .contrib-title { font-size: 15px; }
+  .contrib-sintesi { font-size: 13px; }
+  .contrib-fonte { font-size: 12px; }
+
+  /* Congresso banner */
+  .congresso-banner { padding: 32px 22px; gap: 24px; }
+  .congresso-banner h2 { font-size: 32px; }
+  .congresso-banner p { font-size: 14px; }
+  .congresso-banner-data .day { font-size: 64px; }
+  .congresso-banner-data .month { font-size: 22px; }
+  .congresso-actions { gap: 8px; }
+  .congresso-actions .btn { padding: 9px 14px; font-size: 13px; }
+
+  /* Footer */
+  .site-footer { padding: 48px 16px 24px; }
+  .footer-bottom { flex-direction: column; gap: 8px; align-items: flex-start; }
+}
+
+/* ===========================================
+   RESPONSIVE — SMALL MOBILE (≤ 480px)
+   =========================================== */
+@media (max-width: 480px) {
+  /* Header: solo logo, niente nav inline (resta accessibile via scroll) */
+  .nav a:not(.btn) { font-size: 12px; padding: 4px 8px; }
+
+  /* Hero: title ancora più piccolo */
+  .hero-title { font-size: 32px; line-height: 1; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions .btn { justify-content: center; }
+
+  /* KPI: 1 sola colonna */
+  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi { border-right: none !important; }
+  .kpi-value { font-size: 56px; }
+
+  /* Section title */
+  .section-title { font-size: 26px; }
+
+  /* Themes grid: 1 colonna */
+  .themes-grid { grid-template-columns: 1fr; }
+
+  /* Assemblea: data più compatta */
+  .assemblea-date { min-width: 48px; padding: 8px; }
+  .assemblea-date .day { font-size: 18px; }
+  .assemblea-date .month { font-size: 9px; }
+
+  /* Congresso banner: layout a stack */
+  .congresso-banner h2 { font-size: 28px; }
+  .congresso-banner-data .day { font-size: 56px; line-height: 1; }
+  .congresso-banner-data .month { font-size: 20px; }
+}
+
 /* Print */
 @media print {
   .site-header, .nav, .filter-bar, .hero-actions, .congresso-actions { display: none !important; }
