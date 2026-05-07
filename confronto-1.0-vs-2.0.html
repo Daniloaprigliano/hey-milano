@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hey Milano – Confronto 1.0 vs 2.0</title>
+<style>
+
+  :root {
+    --bg: #f5f2ed;
+    --card-bg: #ffffff;
+    --del-color: #c0392b;
+    --del-bg: #fff5f5;
+    --add-color: #27ae60;
+    --add-bg: #f0fff8;
+    --mod-color: #e09a30;
+    --mod-bg: #fffbf0;
+    --mark-del: #ffc5c5;
+    --mark-add: #b8f0cc;
+    --section-hdr: #1a1a2e;
+    --section-hdr-text: #e8d5b7;
+    --skip-color: #888;
+    --skip-bg: #f0ede8;
+    --border: #ddd;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: #222;
+    line-height: 1.65;
+    font-size: 15px;
+  }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--section-hdr);
+    color: var(--section-hdr-text);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 3px solid var(--mod-color);
+  }
+  .sticky-header .sh-cell {
+    padding: 10px 20px;
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .sticky-header .sh-cell:first-child { border-right: 1px solid #333; }
+
+  .page-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    color: var(--section-hdr-text);
+    padding: 40px 30px 30px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-family: system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+  }
+  .page-header .subtitle {
+    font-size: 1rem;
+    opacity: 0.75;
+    font-style: italic;
+  }
+
+  .stats-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 24px auto;
+    max-width: 960px;
+    padding: 20px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-around;
+  }
+  .stat-item { text-align: center; min-width: 120px; }
+  .stat-num {
+    font-size: 2rem;
+    font-weight: 900;
+    font-family: system-ui, sans-serif;
+    line-height: 1;
+  }
+  .stat-num.add { color: var(--add-color); }
+  .stat-num.del { color: var(--del-color); }
+  .stat-num.mod { color: var(--mod-color); }
+  .stat-label { font-size: 0.8rem; color: #666; margin-top: 4px; font-family: system-ui, sans-serif; }
+
+  .controls {
+    max-width: 960px;
+    margin: 0 auto 16px;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1.5px solid;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.8; }
+  .btn-primary { background: var(--section-hdr); color: var(--section-hdr-text); border-color: var(--section-hdr); }
+  .btn-outline { background: #fff; color: #444; border-color: #ccc; }
+
+  .index-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-width: 960px;
+    margin: 0 auto 24px;
+    padding: 20px 28px;
+  }
+  .index-panel h2 {
+    font-family: system-ui, sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  .index-panel ol { column-count: 2; column-gap: 24px; padding-left: 20px; }
+  .index-panel li { margin-bottom: 5px; }
+  .index-panel a { color: var(--section-hdr); text-decoration: none; font-size: 0.9rem; font-family: system-ui, sans-serif; }
+  .index-panel a:hover { text-decoration: underline; }
+
+  .doc-section {
+    max-width: 960px;
+    margin: 0 auto 32px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .section-title {
+    background: var(--section-hdr);
+    color: var(--section-hdr-text);
+    font-family: system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 14px 20px;
+    border-bottom: 2px solid #2d2d4e;
+  }
+  .section-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 10px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+  .section-badge-new { background: var(--add-color); color: white; }
+  .section-badge-del { background: var(--del-color); color: white; }
+
+  .section-body { padding: 0; }
+
+  .diff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #eee;
+  }
+  .diff-row:last-child { border-bottom: none; }
+
+  .cell {
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .cell p { margin-bottom: 0.6em; }
+  .cell p:last-child { margin-bottom: 0; }
+  .cell ul, .cell ol { padding-left: 20px; margin-top: 0.4em; }
+  .cell li { margin-bottom: 4px; }
+  .cell-del { background: var(--del-bg); border-right: 3px solid var(--del-color); }
+  .cell-add { background: var(--add-bg); }
+  .cell-empty { background: #f8f8f8; display: flex; align-items: center; justify-content: center; color: #aaa; font-family: system-ui, sans-serif; font-size: 0.85rem; }
+
+  mark.del-mark { background: var(--mark-del); color: #8b0000; border-radius: 2px; padding: 0 1px; }
+  mark.add-mark { background: var(--mark-add); color: #1a5c35; border-radius: 2px; padding: 0 1px; }
+
+  .skip-row {
+    background: var(--skip-bg);
+    color: var(--skip-color);
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 7px 16px;
+    border-bottom: 1px solid #e8e4df;
+    letter-spacing: 0.05em;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .badge-del { background: var(--del-color); color: white; }
+  .badge-add { background: var(--add-color); color: white; }
+
+  .section-label-row {
+    display: flex;
+    padding: 8px 18px;
+    gap: 8px;
+    background: var(--mod-bg);
+    border-bottom: 1px solid #f0d9a0;
+    font-family: system-ui, sans-serif;
+    font-size: 0.82rem;
+    color: #7a5a00;
+  }
+  .label-v1 { flex: 1; text-align: left; }
+  .label-v2 { flex: 1; text-align: right; }
+
+  .subsection-new {
+    background: var(--add-bg);
+    border: 1.5px solid var(--add-color);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 4px 0;
+  }
+  .subsection-title {
+    font-family: system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--add-color);
+    margin-bottom: 10px;
+  }
+  .subsection-new ul, .subsection-new ol { padding-left: 20px; font-size: 0.88rem; line-height: 1.6; }
+  .subsection-new li { margin-bottom: 6px; }
+
+  .legend {
+    max-width: 960px;
+    margin: 0 auto 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 16px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+
+  footer {
+    max-width: 960px;
+    margin: 32px auto 48px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+  }
+
+  @media (max-width: 680px) {
+    .diff-row { grid-template-columns: 1fr; }
+    .cell-del { border-right: none; border-bottom: 3px solid var(--del-color); }
+    .sticky-header { grid-template-columns: 1fr; }
+    .sticky-header .sh-cell:first-child { border-right: none; border-bottom: 1px solid #333; }
+    .index-panel ol { column-count: 1; }
+    .stats-panel { gap: 12px; }
+    .section-label-row { flex-direction: column; }
+    .page-header h1 { font-size: 1.4rem; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Hey Milano – Confronto 1.0 vs 2.0</h1>
+  <p class="subtitle">Documento politico del Circolo e Centro Studi Emilio Caldara · Analisi delle differenze tra versioni</p>
+</div>
+
+<div class="stats-panel">
+  <div class="stat-item">
+    <div class="stat-num add">3</div>
+    <div class="stat-label">Sezioni aggiunte<br>(Introduzione, Sfida 10,<br>La scuola come infrastruttura)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num del">1</div>
+    <div class="stat-label">Sezioni eliminate<br>(Il Modello Milano<br>non esiste)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num mod">~25</div>
+    <div class="stat-label">Paragrafi modificati</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num mod">4</div>
+    <div class="stat-label">Correzioni tipografiche<br>(ricostruirendo, de risparmi,<br>architettoiche, ecc.)</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="toggleBtn" class="btn btn-primary" onclick="toggleIdentical()">Nascondi paragrafi identici</button>
+  <button class="btn btn-outline" onclick="scrollToTop()">↑ Torna in cima</button>
+  <span style="font-family:system-ui;font-size:0.8rem;color:#888;margin-left:8px;">
+    Diff calcolata con difflib · word-level
+  </span>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--del-bg);border:2px solid var(--del-color)"></div>
+    <span>Testo eliminato (1.0)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--add-bg);border:2px solid var(--add-color)"></div>
+    <span>Testo aggiunto (2.0)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--mark-del)"></div>
+    <span>Parole rimosse (inline)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--mark-add)"></div>
+    <span>Parole aggiunte (inline)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--skip-bg);border:1px solid #ccc"></div>
+    <span>Blocchi identici (saltati)</span>
+  </div>
+</div>
+
+<div class="index-panel">
+  <h2>Indice delle sezioni</h2>
+  <ol>
+<li><a href="#intestazione">Intestazione</a></li>
+<li><a href="#introduzione">Introduzione (nuova nel 2.0)</a></li>
+<li><a href="#metodo">Metodo</a></li>
+<li><a href="#contesto">Contesto / Premessa</a></li>
+<li><a href="#indirizzo">Indirizzo Politico</a></li>
+<li><a href="#obiettivi">Obiettivi di Lunga Durata</a></li>
+<li><a href="#proposte-intestazione">Proposte — Intestazione</a></li>
+<li><a href="#sfida1">Sfida 1 – Rivoluzione amministrativa</a></li>
+<li><a href="#sfida2">Sfida 2 – Risorse sociali</a></li>
+<li><a href="#sfida3">Sfida 3 – Risorse comunali</a></li>
+<li><a href="#sfida4">Sfida 4 – Politiche abitative</a></li>
+<li><a href="#sfida5">Sfida 5 – Innovazione e talenti</a></li>
+<li><a href="#sfida6">Sfida 6 – Salute pubblica</a></li>
+<li><a href="#sfida7">Sfida 7 – Vulnerabilità e coesione</a></li>
+<li><a href="#sfida8">Sfida 8 – Stagioni della vita / Scuola</a></li>
+<li><a href="#sfida9">Sfida 9 – Cultura, sport, saperi</a></li>
+<li><a href="#sfida10">Sfida 10 – Partecipazione (nuova nel 2.0)</a></li>
+  </ol>
+</div>
+
+<div class="sticky-header">
+  <div class="sh-cell">Versione 1.0</div>
+  <div class="sh-cell">Versione 2.0</div>
+</div>
+
+<section id="intestazione" class="doc-section">
+  <h2 class="section-title">Intestazione</h2>
+  <div class="section-body">
+<div class="skip-row">── 1 righe identiche (GRUPPO PROMOTORE) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Nel</mark> <mark class="del-mark">solco</mark> <mark class="del-mark">del</mark> <mark class="del-mark">riformismo</mark> <mark class="del-mark">ambrosiano</mark>
+<mark class="del-mark">per</mark> <mark class="del-mark">una</mark> <mark class="del-mark">nuova</mark> <mark class="del-mark">leadership collettiva.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">NEL</mark> <mark class="add-mark">SOLCO</mark> <mark class="add-mark">DEL</mark> <mark class="add-mark">RIFORMISMO</mark> <mark class="add-mark">AMBROSIANO</mark>
+<mark class="add-mark">PER</mark> <mark class="add-mark">UNA</mark> <mark class="add-mark">LEADERSHIP</mark> <mark class="add-mark">COLLETTIVA</mark></div>
+</div>
+<div class="skip-row">── 1 righe identiche (URL) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Metodo | <mark class="del-mark">Contesto</mark> | Indirizzo | Proposte</div>
+  <div class="cell cell-add">Metodo | <mark class="add-mark">Premessa</mark> | Indirizzo | <mark class="add-mark">Obiettivi | </mark>Proposte</div>
+</div>
+  </div>
+</section>
+<section id="introduzione" class="doc-section">
+  <h2 class="section-title">Introduzione <span class="section-badge section-badge-new">NUOVA</span></h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p><strong>Sezione completamente nuova nel 2.0 &mdash; 7 paragrafi.</strong></p><p>&laquo;Come si fa a governare una citt&agrave; che non si conosce?&raquo; &mdash; incipit della sezione introduttiva che descrive la genesi e il metodo di Hey Milano, le assemblee diffuse, il Registro dei Contributi, il Comitato Promotore e il Congresso per la Citt&agrave;.</p></div>
+</div>
+  </div>
+</section>
+<section id="metodo" class="doc-section">
+  <h2 class="section-title">Metodo</h2>
+  <div class="section-body">
+<div class="skip-row">── 1 paragrafo identico (apertura) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Abbiamo</mark> <mark class="del-mark">raccolto</mark> i dati, <mark class="del-mark">analizzato</mark> le tendenze, <mark class="del-mark">studiato</mark> i fatti, per andare oltre le sensazioni e avvicinarci, quanto più possibile, a una lettura reale di questi quindici anni. E <mark class="del-mark">lo abbiamo fatto</mark> attraverso un percorso di ascolto e verifica, in dieci appuntamenti, che abbiamo chiamato “Hey Milano, come <mark class="del-mark">stai? ”.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Sono</mark> <mark class="add-mark">stati raccolti</mark> i dati, <mark class="add-mark">analizzate</mark> le tendenze, <mark class="add-mark">studiati</mark> i fatti, per andare oltre le sensazioni e avvicinarci, quanto più possibile, a una lettura reale di questi quindici anni. E <mark class="add-mark">tutto</mark> attraverso un percorso di ascolto e verifica, in dieci appuntamenti, che abbiamo chiamato “Hey Milano, come <mark class="add-mark">stai?”.</mark></div>
+</div>
+<div class="skip-row">── 1 paragrafo identico (volume e-book) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Dalla lettura politica di questo materiale scaturisce il presente documento che è, insieme, sintesi <mark class="del-mark">del</mark> <mark class="del-mark">percorso</mark> “Hey Milano, come stai?” e <mark class="del-mark">primo abbozzo </mark>della seconda fase<mark class="del-mark"> ipotizzata, che intendiamo denominare</mark> “Hey Milano, dove <mark class="del-mark">andiamo?</mark> <mark class="del-mark">”,</mark> <mark class="del-mark">con</mark> l’ambizione di <mark class="del-mark">arrivare a </mark>definire una proposta di governo per la Milano dei prossimi anni.</div>
+  <div class="cell cell-add">Dalla lettura politica di questo materiale scaturisce il presente documento che è, insieme, sintesi <mark class="add-mark">della</mark> <mark class="add-mark">prima fase</mark> “Hey Milano, come stai?” e della seconda fase “Hey Milano, dove <mark class="add-mark">andiamo?”,</mark> <mark class="add-mark">e</mark> <mark class="add-mark">che si pone</mark> l’ambizione di definire una<mark class="add-mark"> necessaria</mark> proposta di governo per la Milano dei prossimi anni.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><p>Siamo convinti che il cambiamento avvenuto nella nostra città non renda pensabile un allungamento dell’attuale ciclo di governo (nei termini di un “quarto mandato” dell’attuale centrosinistra) e che sia pertanto opportuno e urgente ragionare di un nuovo inizio, con una visione ed un programma che guardino al futuro. Perché completamente diverso da quello degli ultimi anni è il contesto nel quale la prossima amministrazione dovrà operare.</p></div>
+  <div class="cell cell-empty"><span class="badge badge-del">✗ eliminato</span></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Come</mark> <mark class="del-mark">in</mark> <mark class="del-mark">tutti</mark> <mark class="del-mark">i</mark> <mark class="del-mark">momenti</mark> <mark class="del-mark">di</mark> <mark class="del-mark">svolta</mark> <mark class="del-mark">e</mark> <mark class="del-mark">di</mark> <mark class="del-mark">cambio di ciclo avvenuti a Milano, pensiamo che la nuova</mark> proposta politica <mark class="del-mark">non possa </mark>che <mark class="del-mark">originare</mark> da<mark class="del-mark"> un’analisi critica del presente e delle ragioni principali che l’hanno determinato. Per farlo al meglio occorre avviare</mark> un dibattito pubblico ampio e partecipato che <mark class="del-mark">consenta</mark> il confronto fra idee, posizioni e opinioni <mark class="del-mark">diverse,</mark> <mark class="del-mark">per</mark> <mark class="del-mark">pervenire</mark> <mark class="del-mark">a</mark> <mark class="del-mark">una</mark> <mark class="del-mark">sintesi</mark> <mark class="del-mark">e</mark> <mark class="del-mark">a una proposta finale da sottoporre agli elettori, che sia</mark> all’altezza della tradizione politica municipalista ambrosiana.</div>
+  <div class="cell cell-add"><mark class="add-mark">Il</mark> <mark class="add-mark">grande</mark> <mark class="add-mark">cambiamento</mark> <mark class="add-mark">avvenuto</mark> <mark class="add-mark">nella</mark> <mark class="add-mark">nostra</mark> <mark class="add-mark">città</mark> <mark class="add-mark">richiede</mark> <mark class="add-mark">ora</mark> <mark class="add-mark">una</mark> proposta politica che <mark class="add-mark">derivi</mark> da un dibattito pubblico ampio e partecipato che <mark class="add-mark">ben utilizzi</mark> il confronto fra idee, posizioni e opinioni <mark class="add-mark">diverse;</mark> <mark class="add-mark">secondo</mark> <mark class="add-mark">noi,</mark> <mark class="add-mark">quanto</mark> <mark class="add-mark">è</mark> <mark class="add-mark">avvenuto</mark> <mark class="add-mark">è</mark> <mark class="add-mark">stato</mark> all’altezza della tradizione politica municipalista ambrosiana.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Mettiamo</mark> <mark class="del-mark">dunque</mark> a disposizione di partiti, associazioni, militanti e cittadini i risultati <mark class="del-mark">del</mark> <mark class="del-mark">nostro</mark> lavoro, <mark class="del-mark">seguiti</mark> <mark class="del-mark">da</mark> una <mark class="del-mark">precisa</mark> <mark class="del-mark">proposta</mark> <mark class="del-mark">politica,</mark> <mark class="del-mark">che</mark> <mark class="del-mark">è</mark> di metodo <mark class="del-mark">ma anche</mark> di <mark class="del-mark">merito.</mark> <mark class="del-mark">Ci prendiamo dunque la responsabilità di indicare scelte politiche che, a nostro avviso, tutte</mark> quelle e quelli che si candidateranno a guidare la città in ruoli di responsabilità dovrebbero valutare e adottare come principi guida per l’azione amministrativa.</div>
+  <div class="cell cell-add"><mark class="add-mark">Si</mark> <mark class="add-mark">ritiene quindi opportuno mettere</mark> a disposizione di partiti, associazioni, militanti e cittadini i risultati <mark class="add-mark">di</mark> <mark class="add-mark">un ampio e articolato</mark> lavoro, <mark class="add-mark">che</mark> <mark class="add-mark">ha prodotto</mark> una <mark class="add-mark">serie</mark> <mark class="add-mark">di</mark> <mark class="add-mark">scelte</mark> <mark class="add-mark">politiche,</mark> <mark class="add-mark">sia</mark> di metodo <mark class="add-mark">che</mark> di <mark class="add-mark">merito,</mark> <mark class="add-mark">che</mark> quelle e quelli che si candidateranno a guidare la città in ruoli di responsabilità dovrebbero valutare e adottare come principi guida per l’azione amministrativa.</div>
+</div>
+  </div>
+</section>
+<section id="contesto" class="doc-section">
+  <h2 class="section-title">Contesto / Premessa</h2>
+  <div class="section-body">
+<div class="section-label-row"><span class="label-v1">Titolo sezione: <strong>CONTESTO</strong></span><span class="label-v2">Titolo sezione: <strong>Premessa</strong></span></div>
+<div class="diff-row">
+  <div class="cell cell-del"><p><strong>IL &ldquo;MODELLO MILANO&rdquo; NON ESISTE, UN &ldquo;METODO MILANO&rdquo; S&Igrave;.</strong></p><p>Da un po’ di tempo è entrato nel vocabolario politico trasversale il cosiddetto “Modello Milano”. Nessuno ha mai spiegato cosa volesse dire esattamente, tuttavia se ne sono evocate paternità politiche e, di recente, si è parlato di una sua crisi. Di sicuro chi ha evocato questo fantomatico “Modello” ha comunque lasciato intendere che sia stato progettato a tavolino e poi fatto calare sulla città.</p><p>Per noi di Hey Milano non esiste e non deve esistere alcun “Modello Milano” calato dall’alto, perché la profonda identità democratica e partecipativa della città non ha mai accettato signorie di alcun tipo, neanche “illuminate”, che sostituissero l’interazione comunitaria con il volere di pochi.</p><p>Per noi esiste semmai – e ciò appartiene senz’altro ai geni della città - un “metodo Milano” o, meglio, un metodo politico ambrosiano, fatto di pragmatismo riformista che non indica un’unica e salvifica direzione verso un immaginifico ‘sol dell’avvenire’ ma che non perde mai di vista la natura profonda di quello che muove la Milano democratica: migliorare le condizioni di vita di tutta la comunità, e non solo di una parte di essa.</p></div>
+  <div class="cell cell-empty"><span class="badge badge-del">✗ eliminato</span></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Questi</mark> <mark class="del-mark">capisaldi,</mark> <mark class="del-mark">nella</mark> <mark class="del-mark">gestione</mark> <mark class="del-mark">più</mark> <mark class="del-mark">recente della vita cittadina, sono stati messi a dura prova. Bisogna</mark> riprendere vigore <mark class="del-mark">e rilanciare </mark>la <mark class="del-mark">fiducia</mark> e <mark class="del-mark">la</mark> <mark class="del-mark">volontà</mark> di <mark class="del-mark">partecipazione</mark> <mark class="del-mark">della</mark> <mark class="del-mark">comunità</mark> <mark class="del-mark">cittadina</mark> <mark class="del-mark">nel</mark> <mark class="del-mark">dialogo</mark> con <mark class="del-mark">l’amministrazione</mark> <mark class="del-mark">comunale.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Per</mark> <mark class="add-mark">noi</mark> <mark class="add-mark">di</mark> <mark class="add-mark">Hey</mark> <mark class="add-mark">Milano</mark> <mark class="add-mark">deve</mark> riprendere vigore la <mark class="add-mark">profonda identità democratica</mark> e <mark class="add-mark">partecipativa</mark> <mark class="add-mark">della città, che non accetta signorie</mark> di <mark class="add-mark">alcun</mark> <mark class="add-mark">tipo,</mark> <mark class="add-mark">neanche</mark> <mark class="add-mark">“illuminate”,</mark> <mark class="add-mark">che</mark> <mark class="add-mark">sostituiscano l’interazione comunitaria</mark> con <mark class="add-mark">il</mark> <mark class="add-mark">volere di pochi.</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">La</mark> <mark class="del-mark">critica</mark> <mark class="del-mark">a</mark> <mark class="del-mark">cui</mark> <mark class="del-mark">fornire</mark> <mark class="del-mark">risposte</mark> <mark class="del-mark">convincenti</mark> è <mark class="del-mark">quella</mark> che <mark class="del-mark">tratteggia</mark> <mark class="del-mark">un</mark> <mark class="del-mark">progressivo</mark> e <mark class="del-mark">rapido</mark> <mark class="del-mark">abbandono</mark> della <mark class="del-mark">leadership e della responsabilità collettiva delle scelte, un allentamento nella quantità e nella qualità della condivisione delle scelte amministrative. Il sistema delle partecipate non può essere oggetto di valutazioni collegate solo alla gestione del portafoglio, ma assumere un ruolo protagonista di supporto politico amministrativo, per evitare la completa omologazione politica di Milano alle altre città sul tavolo della politica nazionale. È necessario mettere in campo una nuova identità politica che, dopo la stagione dell’Expo e delle Olimpiadi, raccolga a beneficio dell’intera </mark>comunità <mark class="del-mark">i</mark> <mark class="del-mark">frutti</mark> <mark class="del-mark">degli</mark> <mark class="del-mark">investimenti</mark> <mark class="del-mark">finanziari</mark> <mark class="del-mark">sulla città, cavalcando l’onda della accresciuta reputazione internazionale di Milano.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Per</mark> <mark class="add-mark">noi</mark> <mark class="add-mark">di</mark> <mark class="add-mark">Hey</mark> <mark class="add-mark">Milano</mark> <mark class="add-mark">esiste</mark> <mark class="add-mark">un metodo politico ambrosiano, fatto di pragmatismo riformista che non perde mai di vista la natura profonda di quello che muove la Milano democratica: migliorare le condizioni di vita di tutta la comunità, e non solo di una parte di essa. Considerando come</mark> è <mark class="add-mark">cambiata Milano negli ultimi 15 anni e come vorremmo</mark> che <mark class="add-mark">cambiasse</mark> <mark class="add-mark">nei</mark> <mark class="add-mark">prossimi anni, bisogna rilanciare la fiducia</mark> e <mark class="add-mark">la</mark> <mark class="add-mark">volontà di partecipazione</mark> della comunità <mark class="add-mark">cittadina</mark> <mark class="add-mark">nel</mark> <mark class="add-mark">dialogo</mark> <mark class="add-mark">con</mark> <mark class="add-mark">l’amministrazione</mark> <mark class="add-mark">comunale.</mark></div>
+</div>
+<div class="skip-row">── 1 paragrafo identico (report fotografia) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><p>Per recuperare la propria genesi di benessere di comunità, Milano ha appunto bisogno di ritrovare il suo metodo antico, i cui capisaldi cardine hanno segnato profondamente il senso della stagione politica che nel 2011 consentì il governo della città alle forze di centrosinistra.</p></div>
+  <div class="cell cell-empty"><span class="badge badge-del">✗ eliminato</span></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Quei</mark> <mark class="del-mark">capisaldi, negli impegni</mark> che <mark class="del-mark">ci</mark> <mark class="del-mark">assumiamo</mark> e <mark class="del-mark">nella</mark> <mark class="del-mark">stagione</mark> che <mark class="del-mark">verrà,</mark> dovranno tornare <mark class="del-mark">attuali come allora, nessuno escluso:</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Il</mark> <mark class="add-mark">documento</mark> che <mark class="add-mark">segue</mark> <mark class="add-mark">è il frutto di tre mesi di ragionamenti, riflessioni</mark> e <mark class="add-mark">incontri</mark> <mark class="add-mark">svolti avendo davanti agli occhi e al centro dei pensieri, quella “fotografia”, e questi sono alcuni dei capisaldi</mark> che <mark class="add-mark">pensiamo</mark> dovranno tornare <mark class="add-mark">attuali:</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Il rito ambrosiano<mark class="del-mark"> politico</mark> che <mark class="del-mark">porta ad affermare</mark> che le scelte di Milano sono autonome e non subordinate a un quadro nazionale politico.</div>
+  <div class="cell cell-add">Il rito <mark class="add-mark">politico </mark>ambrosiano che <mark class="add-mark">afferma</mark> che le scelte di Milano sono autonome e non subordinate a un quadro nazionale politico.</div>
+</div>
+<div class="skip-row">── 4 capisaldi identici (2–5) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Il ruolo centrale di una maggioranza politica consiliare che si verifica <mark class="del-mark">costantemente,</mark> che non si limita a ratificare le scelte della giunta e che si confronta con l’opposizione.</div>
+  <div class="cell cell-add">Il ruolo centrale di una maggioranza politica consiliare che si verifica <mark class="add-mark">costantemente sulle diverse proposte,</mark> che non si limita a ratificare le scelte della giunta e che si confronta con l’opposizione.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Un</mark> <mark class="del-mark">obiettivo ultimo</mark> di ricucitura complessiva del tessuto sociale e amministrativo dell’area metropolitana per renderla più funzionale e più adatta a raccogliere le sfide di un futuro <mark class="del-mark">incerto</mark> e<mark class="del-mark"> di un presente pieno di vecchie smagliature e di</mark> crescenti disuguaglianze.</div>
+  <div class="cell cell-add"><mark class="add-mark">L’obiettivo</mark> <mark class="add-mark">importante</mark> di ricucitura complessiva del tessuto sociale e amministrativo dell’area metropolitana per renderla più funzionale e più adatta a raccogliere le sfide di un futuro <mark class="add-mark">incerto, aggravato dalle accresciute</mark> e crescenti disuguaglianze.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><p>Oggi più che mai bisogna ritrovare il cuore di quella identità cittadina, per <mark class="del-mark">correggere</mark> – con le radicalità necessarie – <mark class="del-mark">un</mark> <mark class="del-mark">corso</mark> <mark class="del-mark">recente</mark> <mark class="del-mark">in</mark> <mark class="del-mark">cui è palpabile il</mark> prevalere <mark class="del-mark">della</mark> diseguaglianza <mark class="del-mark">sull’equità:</mark> <mark class="del-mark">parla</mark> <mark class="del-mark">da</mark> <mark class="del-mark">solo</mark> <mark class="del-mark">il</mark> tema della casa, accessibile solo a redditi elevati o a chi è protetto <mark class="del-mark">dalle</mark> <mark class="del-mark">famiglie</mark> di origine.</p></div>
+  <div class="cell cell-add"><p>Oggi più che mai bisogna ritrovare il cuore di quella identità cittadina, per <mark class="add-mark">indicare</mark> – con le radicalità necessarie – <mark class="add-mark">come</mark> <mark class="add-mark">evitare</mark> <mark class="add-mark">che</mark> <mark class="add-mark">continui</mark> <mark class="add-mark">a</mark> prevalere <mark class="add-mark">la deriva alla</mark> diseguaglianza <mark class="add-mark">rispetto</mark> <mark class="add-mark">alla</mark> <mark class="add-mark">spinta</mark> <mark class="add-mark">verso</mark> <mark class="add-mark">l’equità: basta pensare al</mark> tema della casa, accessibile solo a redditi elevati o a chi è protetto <mark class="add-mark">dalla</mark> <mark class="add-mark">famiglia</mark> di origine.</p></div>
+</div>
+  </div>
+</section>
+<section id="indirizzo" class="doc-section">
+  <h2 class="section-title">Indirizzo Politico</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Il <mark class="del-mark">processo</mark> “Hey Milano” nasce pertanto dalla consapevolezza che il modello di sviluppo attuale <mark class="del-mark">—</mark> pur avendo prodotto risultati significativi <mark class="del-mark">—</mark> ha generato squilibri <mark class="del-mark">insostenibili.</mark></div>
+  <div class="cell cell-add">Il <mark class="add-mark">percorso</mark> “Hey Milano” nasce pertanto dalla consapevolezza che il modello di sviluppo attuale <mark class="add-mark">–</mark> pur avendo prodotto risultati significativi <mark class="add-mark">–</mark> ha generato <mark class="add-mark">anche </mark>squilibri <mark class="add-mark">insostenibili che vanno rapidamente corretti.</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">L’esito</mark> <mark class="del-mark">del</mark> <mark class="del-mark">processo</mark> <mark class="del-mark">ha individuato</mark> 8 pilastri per una visione strategica riformista della città:</div>
+  <div class="cell cell-add"><mark class="add-mark">Sono</mark> <mark class="add-mark">stati</mark> <mark class="add-mark">esplicitamente</mark> <mark class="add-mark">individuati</mark> 8 pilastri<mark class="add-mark"> di riferimento</mark> per una visione strategica riformista della città:</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Superare la logica elettorale di breve periodo per progettare una Milano capace di affrontare le sfide del prossimo decennio.</div>
+  <div class="cell cell-add">Superare la logica elettorale di breve periodo per progettare una Milano capace di affrontare le sfide <mark class="add-mark">future, a cominciare da quelle </mark>del prossimo decennio.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Riconoscere e difendere le conquiste del passato (città aperta, innovativa, accogliente), ma imprimere una svolta netta contro la deriva della “città-rendita” che <mark class="del-mark">esclude</mark> residenti e ceti medi.</div>
+  <div class="cell cell-add">Riconoscere e difendere le conquiste del passato (città aperta, innovativa, accogliente), ma imprimere una svolta netta contro la deriva della “città-rendita” che <mark class="add-mark">tende progressivamente ad escludere</mark> residenti e ceti medi.</div>
+</div>
+<div class="skip-row">── 1 pilastro identico (3) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Mobilitare le energie interne, i talenti e le competenze diffuse nel tessuto civico, passando dal ruolo di “gestore” a quello di “catalizzatore” di energia.</div>
+  <div class="cell cell-add">Mobilitare le energie interne, i talenti e le competenze diffuse nel tessuto civico, passando dal ruolo di <mark class="add-mark">semplice </mark>“gestore” a quello di <mark class="add-mark">essenziale </mark>“catalizzatore” di energia.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Visione d’insieme: passare</mark> da una dimensione comunale a una metropolitana come necessario e non rinviabile presupposto per politiche <mark class="del-mark">integrate efficaci.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Passare</mark> da una dimensione comunale a una metropolitana come necessario e non rinviabile presupposto per <mark class="add-mark">efficaci </mark>politiche <mark class="add-mark">integrate.</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Visione territoriale: riformare</mark> i Municipi dotandoli di poteri, autonomia e risorse reali per gestire la <mark class="del-mark">prossimità.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Riformare</mark> i Municipi dotandoli di poteri, autonomia e risorse reali per gestire la <mark class="add-mark">prossimità al servizio delle esigenze dei Cittadini.</mark></div>
+</div>
+<div class="skip-row">── 1 pilastro identico (7) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Preservare</mark> <mark class="del-mark">sempre</mark> <mark class="del-mark">il</mark> <mark class="del-mark">“casino</mark> <mark class="del-mark">creativo”</mark> e la biodiversità sociale e funzionale di Milano, evitando che diventi una città museale, anziana o <mark class="del-mark">solamente </mark>finanziaria.</div>
+  <div class="cell cell-add"><mark class="add-mark">Difendere</mark> <mark class="add-mark">e</mark> <mark class="add-mark">rafforzare</mark> <mark class="add-mark">la</mark> <mark class="add-mark">creatività</mark> e la biodiversità sociale e funzionale di Milano, evitando che diventi <mark class="add-mark">in prevalenza </mark>una città museale, anziana o finanziaria.</div>
+</div>
+  </div>
+</section>
+<section id="obiettivi" class="doc-section">
+  <h2 class="section-title">Obiettivi di Lunga Durata</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Mano Visibile: Rappresenta l’intervento diretto del Comune, trasparente e orientato a imbrigliare le dinamiche economiche in quelle sociali per garantire un punto di equilibrio sostenibile tra le prime e le seconde.</div>
+  <div class="cell cell-add">Mano Visibile: Rappresenta l’intervento diretto del Comune, trasparente e orientato a imbrigliare le dinamiche economiche in quelle sociali per garantire un punto di <mark class="add-mark">necessario </mark>equilibrio sostenibile tra le prime e le seconde.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Città Indivisibile: Indica un approccio urbanistico e politico volto a combattere la segregazione e la frammentazione e a ricucire il tessuto sociale della città, sempre più disgregato in parti sempre meno comunicanti. <mark class="del-mark">Una</mark> città indivisibile <mark class="del-mark">è</mark> un ambiente in cui non vi sono zone dell’Area Metropolitana abbandonate e dove i servizi sono integrati e accessibili a tutti, <mark class="del-mark">promuovendo</mark> la coesione sociale e l’integrazione tra i diversi Comuni del milanese e le persone che li abitano.</div>
+  <div class="cell cell-add">Città Indivisibile: Indica un approccio urbanistico e politico volto a combattere la segregazione e la frammentazione e a ricucire il tessuto sociale della città, <mark class="add-mark">che si ritrova </mark>sempre più disgregato in parti sempre meno comunicanti. <mark class="add-mark">Per</mark> città indivisibile <mark class="add-mark">si indica</mark> un ambiente in cui non vi sono zone dell’Area Metropolitana abbandonate e dove i servizi sono integrati e accessibili a tutti, <mark class="add-mark">un ambiente in cui si promuove</mark> la coesione sociale e l’integrazione tra i diversi Comuni del milanese e le persone che li abitano.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Prosperità Condivisa: È l’obiettivo <mark class="del-mark">finale:</mark> uno sviluppo economico che non si traduca solo in profitto per <mark class="del-mark">pochi (utile),</mark> ma che generi partecipazione e reciproco ascolto tra istituzioni e territorio, condizioni di massima accessibilità ai servizi e ai bisogni primari, giustizia sociale e disponibilità alla cooperazione e alla cura reciproca, tra cittadini e istituzioni.</div>
+  <div class="cell cell-add">Prosperità Condivisa: È l’obiettivo <mark class="add-mark">finale –</mark> uno sviluppo economico che non si traduca solo in profitto per <mark class="add-mark">pochi,</mark> ma che generi partecipazione e reciproco ascolto tra istituzioni e territorio, condizioni di massima accessibilità ai servizi e ai bisogni primari, giustizia sociale e disponibilità alla cooperazione e alla cura reciproca, tra cittadini e istituzioni.</div>
+</div>
+  </div>
+</section>
+<section id="proposte-intestazione" class="doc-section">
+  <h2 class="section-title">Proposte — Intestazione</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del"><strong><mark class="del-mark">8</mark> <mark class="del-mark">SFIDE</mark> <mark class="del-mark">PER</mark> <mark class="del-mark">UNA</mark> <mark class="del-mark">NETTA</mark> <mark class="del-mark">CORREZIONE</mark> <mark class="del-mark">DI</mark> <mark class="del-mark">ROTTA</mark></strong></div>
+  <div class="cell cell-add"><strong><mark class="add-mark">Almeno</mark> <mark class="add-mark">una</mark> <mark class="add-mark">decina</mark> <mark class="add-mark">di</mark> <mark class="add-mark">sfide</mark> <mark class="add-mark">per</mark> <mark class="add-mark">indicare</mark> <mark class="add-mark">una nuova rotta</mark></strong></div>
+</div>
+  </div>
+</section>
+<section id="sfida1" class="doc-section">
+  <h2 class="section-title">Sfida 1 – Rivoluzione amministrativa metropolitana</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Ridefinire radicalmente l’assetto e lo sguardo amministrativo<mark class="del-mark">
+UNA RIVOLUZIONE COPERNICANA</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">1. </mark>Ridefinire radicalmente l’assetto e lo sguardo amministrativo</div>
+</div>
+<div class="skip-row">── 1 riga identica (Nei prossimi 5 anni…) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">C’è</mark> un <mark class="del-mark">chiaro</mark> <mark class="del-mark">effetto</mark> <mark class="del-mark">Manhattan</mark> a <mark class="del-mark">Milano,</mark> con <mark class="del-mark">un</mark> <mark class="del-mark">incremento</mark> <mark class="del-mark">numericamente</mark> <mark class="del-mark">limitato</mark> ma <mark class="del-mark">molto</mark> <mark class="del-mark">significativo</mark> <mark class="del-mark">dei</mark> <mark class="del-mark">multimilionari</mark> <mark class="del-mark">e dei miliardari stranieri in città. È urgente il passaggio da una prospettiva Manhattan</mark> a <mark class="del-mark">una</mark> <mark class="del-mark">prospettiva</mark> <mark class="del-mark">New York: tutte le politiche andranno riprogettate su scala metropolitana e con governo metropolitano. Occorre fermare o quantomeno non favorire la concentrazione di ricchezza e rendite nei quartieri del</mark> Comune di <mark class="del-mark">Milano.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">L’attrattività di Milano, negli ultimi 15 anni, è cresciuta spasmodicamente. Dall’Italia e dal mondo,</mark> un <mark class="add-mark">numero</mark> <mark class="add-mark">sempre</mark> <mark class="add-mark">più elevato di persone ha scelto di venirci</mark> a <mark class="add-mark">studiare o lavorare, di investirvi acquistando casa o semplicemente di passarci un weekend. Una domanda in forte aumento si è così scontrata</mark> con <mark class="add-mark">un’offerta</mark> <mark class="add-mark">limitata:</mark> <mark class="add-mark">non</mark> <mark class="add-mark">solo perché una città richiede tempo per espandersi,</mark> ma <mark class="add-mark">anche</mark> <mark class="add-mark">perché</mark> <mark class="add-mark">siamo</mark> <mark class="add-mark">troppo</mark> <mark class="add-mark">abituati</mark> a <mark class="add-mark">pensare</mark> <mark class="add-mark">solo</mark> <mark class="add-mark">al</mark> Comune di <mark class="add-mark">Milano senza considerare la sua città metropolitana.</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Il prossimo Sindaco di Milano deve essere in primis Sindaco <mark class="del-mark">metropolitano.</mark> Ferme restando dunque le competenze amministrative della Giunta e del Consiglio comunale di Milano la nuova visione politica si deve spostare a livello di Consiglio metropolitano e di Conferenza metropolitana, le cui valutazioni e decisioni dovranno essere il più possibile condizionate e indirizzate da un disegno <mark class="del-mark">convincente</mark> proposto dal Comune di <mark class="del-mark">Milano,</mark> concertato con le altre realtà coinvolte e implementato nell’ottica di una più ampia e compiuta cooperazione istituzionale e territoriale tra le parti di cui è composto il Sistema metropolitano.</div>
+  <div class="cell cell-add">Il prossimo Sindaco di Milano deve <mark class="add-mark">considerare di </mark>essere in primis Sindaco <mark class="add-mark">metropolitano, e questo comunque venga eletto.</mark> Ferme restando dunque le competenze amministrative della Giunta e del Consiglio comunale di Milano la nuova visione politica si deve spostare a livello di Consiglio metropolitano e di Conferenza metropolitana, le cui valutazioni e decisioni dovranno essere il più possibile condizionate e indirizzate da un disegno <mark class="add-mark">convincente,</mark> proposto dal Comune di <mark class="add-mark">Milano e adeguatamente</mark> concertato con le altre realtà coinvolte e implementato nell’ottica di una più ampia e compiuta cooperazione istituzionale e territoriale tra le parti di cui è composto il Sistema metropolitano.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Istituzione</mark> di un sistematico rapporto <mark class="del-mark">80-20,</mark> <mark class="del-mark">inteso</mark> <mark class="del-mark">come</mark> <mark class="del-mark">rapporto di 80%</mark> di nuovi servizi nell’area <mark class="del-mark">metropolitana e 20% nel territorio comunale. È presumibile che quasi il 50% di residenti nel Comune che hanno lasciato la città sia costituito, di fatto, da persone espulse per ragioni economiche, in massima parte nella fascia 25-39 anni.</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Più</mark> di<mark class="add-mark"> un terzo di chi lascia Milano ogni anno si trasferisce nella Città metropolitana. Per garantire in un’area molto più ampia una qualità della vita comparabile a quella del Comune di Milano, è necessario che i nuovi investimenti siano pensati in ottica metropolitana, garantendo</mark> un sistematico rapporto <mark class="add-mark">nettamente</mark> <mark class="add-mark">favorevole</mark> <mark class="add-mark">alla</mark> <mark class="add-mark">collocazione</mark> di nuovi servizi nell’area <mark class="add-mark">metropolitana.</mark></div>
+</div>
+  </div>
+</section>
+<section id="sfida2" class="doc-section">
+  <h2 class="section-title">Sfida 2 – Risorse sociali</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Aumentare e sfruttare le risorse sociali della città
+<mark class="del-mark">NON DILAPIDARE LA RICCHEZZA SOCIALE CHE LA CITTA’ PRODUCE
+</mark>La presenza di 300.000 volontari…</div>
+  <div class="cell cell-add"><mark class="add-mark">2. </mark>Aumentare e sfruttare le risorse sociali della città
+La presenza di 300.000 volontari…</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Superare politiche segregate tra assessorati e settori d’intervento per aumentare la coerenza e l’efficacia delle iniziative pubbliche.</p><p>Agire in concerto con il terzo settore, istituzionalizzando la co-progettazione e l’amministrazione condivisa, per valorizzare competenze diffuse e rispondere in modo più aderente ai bisogni dei territori.</p></div>
+</div>
+<div class="skip-row">── 1 proposta identica (scuola di reciprocità) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Istituzione di</mark> un assessorato all’energia sociale e al volontariato che si occupi di mettere a sistema, valorizzare e dare pieno ascolto e riconoscimento al ruolo del volontariato e della cittadinanza attiva in città, in qualunque forma si <mark class="del-mark">organizzi</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">Istituire</mark> un assessorato all’energia sociale e al volontariato che si occupi di mettere a sistema, valorizzare e dare pieno ascolto e riconoscimento al ruolo del volontariato e della cittadinanza attiva in città, in qualunque forma si <mark class="add-mark">organizzi. Il segmento “anziani attivi” in particolare può essere considerato come una “riserva” a favore della comunità, perché comprende persone desiderose di dare gratuitamente una mano in diversi modi, sfruttando il proprio bagaglio di competenze e la propria voglia di essere utili in cambio di un riconoscimento sociale e non economico.</mark></div>
+</div>
+<div class="skip-row">── 1 proposta identica (mappatura spazi pubblici) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><p>Anche il segmento “anziani attivi” può essere considerato come una “riserva” a favore della comunità, perché comprende persone desiderose di dare gratuitamente una mano in diversi modi, sfruttando il proprio bagaglio di competenze e la propria voglia di essere utili in cambio di un riconoscimento sociale e non economico. (Paragrafo separato nel 1.0, ora incorporato nella proposta sull’assessorato)</p></div>
+  <div class="cell cell-empty"><span class="badge badge-del">✗ eliminato</span></div>
+</div>
+<div class="skip-row">── 1 proposta identica (commercio di vicinato) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Proposta di</mark> un fondo monetario popolare, alimentato dalla donazione ricorrente e volontaria di un euro al mese (esiste già una piattaforma che lo consente, senza commissioni bancarie), che possa generare una risorsa ricorrente e crescente messa a totale disposizione della creazione di valore sociale non speculativo sui territori. Un fondo patrocinato dai Comuni <mark class="del-mark">dell’Area</mark> Metropolitana tramite l’Assessorato all’energia sociale e al <mark class="del-mark">volontariato</mark> ma governato direttamente dalla stessa comunità dei conferitori sulla base di una Carta del Valore che ne individui criteri e modalità di erogazione.</div>
+  <div class="cell cell-add"><mark class="add-mark">Studiare</mark> un fondo monetario popolare, alimentato dalla donazione ricorrente e volontaria di un euro al mese (esiste già una piattaforma che lo consente, senza commissioni bancarie), che possa generare una risorsa ricorrente e crescente messa a totale disposizione della creazione di valore sociale non speculativo sui territori. Un fondo patrocinato dai Comuni <mark class="add-mark">della Città</mark> Metropolitana tramite l’Assessorato all’energia sociale e al <mark class="add-mark">volontariato,</mark> ma governato direttamente dalla stessa comunità dei conferitori<mark class="add-mark"> delle donazioni,</mark> sulla base di una Carta del Valore che ne individui criteri e modalità di erogazione.</div>
+</div>
+  </div>
+</section>
+<section id="sfida3" class="doc-section">
+  <h2 class="section-title">Sfida 3 – Risorse comunali</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Aumentare e ridefinire le risorse comunali della città
+<mark class="del-mark">DA</mark> <mark class="del-mark">OGNUNO SECONDO LE PROPRIE CAPACITA’ A OGNUNO SECONDO I PROPRI BISOGNI
+L’area</mark> metropolitana di Milano vale il <mark class="del-mark">10%</mark> del PIL nazionale ed è in crescita. Ha 728.000 <mark class="del-mark">dipendenti</mark> per il <mark class="del-mark">65%</mark> nel settore servizi.</div>
+  <div class="cell cell-add"><mark class="add-mark">3. </mark>Aumentare e ridefinire le risorse comunali della città
+<mark class="add-mark">La</mark> <mark class="add-mark">Città</mark> metropolitana di Milano vale il <mark class="add-mark">10 per cento</mark> del PIL nazionale ed è in crescita. Ha 728.000 <mark class="add-mark">lavoratori,</mark> per il <mark class="add-mark">65 per cento</mark> nel settore servizi.</div>
+</div>
+<div class="skip-row">── 3 proposte identiche (quota erariale, holding, tassa soggiorno, city users) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Strutturare gli abbonamenti ATM e, più in generale, tutte le tariffe comunali non più solo per categorie anagrafiche, ma per fasce di reddito: chi guadagna di più paga di più i servizi e i mezzi pubblici.</div>
+  <div class="cell cell-add">Strutturare gli abbonamenti ATM e, più in generale, tutte le tariffe comunali non più solo per categorie anagrafiche, ma per <mark class="add-mark">veritiere </mark>fasce di reddito: chi guadagna di più paga di più i servizi e i mezzi pubblici.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Cambiare approccio con il turismo, contrastando l’overtourism rapido e localizzato e valorizzando il patrimonio permanente, anche meno conosciuto, oltre i grandi eventi. Prevedendo anche nuovi servizi infrastrutturali per alleviare l’intralcio del turismo sulla vita quotidiana dei cittadini, come una nuova rete di servizi igienici pubblici.</p></div>
+</div>
+  </div>
+</section>
+<section id="sfida4" class="doc-section">
+  <h2 class="section-title">Sfida 4 – Politiche abitative</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Ridefinire profondamente strumenti e obiettivi delle politiche abitative<mark class="del-mark">
+LA MANO VISIBILE SULLA CITTA’</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">4. </mark>Ridefinire profondamente strumenti e obiettivi delle politiche abitative</div>
+</div>
+<div class="skip-row">── 1 paragrafo identico (questione abitativa) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Qualsiasi politica dell’abitare non può che avere l’obiettivo di garantire il recupero del mix sociale che ha caratterizzato Milano per secoli, allargando alla scala metropolitana il livello dei servizi urbani – in primis mobilità, scuole e attrezzature sportive <mark class="del-mark">-</mark> e <mark class="del-mark">ricostruirendo</mark> una offerta di abitazioni a prezzo medio-basso.</div>
+  <div class="cell cell-add">Qualsiasi politica dell’abitare non può che avere l’obiettivo di garantire il recupero del mix sociale che ha caratterizzato Milano per secoli, allargando alla scala metropolitana il livello dei servizi urbani – in primis mobilità, scuole e attrezzature sportive <mark class="add-mark">–</mark> e <mark class="add-mark">ricostruendo</mark> una offerta di abitazioni a prezzo medio-basso.</div>
+</div>
+<div class="skip-row">── 5 paragrafi identici (30-40mila appartamenti, gradino ERP, proprietà indivisa) ──</div>
+  </div>
+</section>
+<section id="sfida5" class="doc-section">
+  <h2 class="section-title">Sfida 5 – Innovazione e talenti</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Coltivare e valorizzare innovazione e materia grigia<mark class="del-mark">
+E VISSERO TUTTI CERVELLI E TALENTI</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">5. </mark>Coltivare e valorizzare innovazione e materia grigia</div>
+</div>
+<div class="skip-row">── 4 proposte identiche ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Rilanciare a livello nazionale la Start Tax (detassazione per il primo impiego) e incentivare l’uso <mark class="del-mark">de</mark> risparmi privati per investire in startup, per esempio creando un Milano City Fund.</div>
+  <div class="cell cell-add">Rilanciare a livello nazionale la Start Tax (detassazione per il primo impiego) e incentivare l’uso <mark class="add-mark">dei</mark> risparmi privati per investire in startup, per esempio creando un Milano City Fund.</div>
+</div>
+<div class="skip-row">── 1 proposta identica (universitari fuori sede) ──</div>
+  </div>
+</section>
+<section id="sfida6" class="doc-section">
+  <h2 class="section-title">Sfida 6 – Salute pubblica</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Riprendere le distanze dalla logica del “stia bene chi può”<mark class="del-mark">
+UNA CITTA’ IN BUONA SALUTE PUBBLICA</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">6. </mark>Riprendere le distanze dalla logica del “stia bene chi può”</div>
+</div>
+<div class="skip-row">── 8 proposte identiche (medicina scolastica, consultori, armonizzazione, care giver, RSA, infermiere, campagne, ospedale) ──</div>
+  </div>
+</section>
+<section id="sfida7" class="doc-section">
+  <h2 class="section-title">Sfida 7 – Vulnerabilità e coesione</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Affrontare in modo nuovo una vulnerabilità sempre più diffusa e trasversale<mark class="del-mark">
+L’INDUSTRIA “UMANIFATTURIERA”</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">7. </mark>Affrontare in modo nuovo una vulnerabilità sempre più diffusa e trasversale</div>
+</div>
+<div class="skip-row">── 2 paragrafi identici (sguardo lungo, mercato della paura) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Deve e può esistere anche un “ecosistema della fiducia”, intesa come definizione e pratica di un approccio sistemico che coniughi prevenzione e repressione, per superare l’assurda situazione attuale che vede i due momenti come alternativi.<mark class="del-mark"> La verità è che senza prevenzione sociale la repressione non è legittima. E senza repressione la prevenzione sociale può risultare velleitaria.</mark></div>
+  <div class="cell cell-add">Deve e può esistere anche un “ecosistema della fiducia”, intesa come definizione e pratica di un approccio sistemico che coniughi prevenzione e repressione, per superare l’assurda situazione attuale che vede i due momenti come alternativi.</div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">Non lasciare mai le denunce e le segnalazioni dei cittadini senza riscontro, anche quando fosse negativo. La microcriminalità sfugge alle risposte puramente muscolari in quanto è sospinta da necessità e urgenze che sono altrettanto forti. La strada è quella, a doppio senso, di non far sentire mai soli quelli che subiscono la microcriminalità e di intervenire sulle condizioni culturali ed economiche che creano emarginazione e innescano gli odiosi fenomeni microcriminali di rivalsa sulla società.</div>
+  <div class="cell cell-add">Non lasciare mai le denunce e le segnalazioni dei cittadini senza riscontro, anche quando fosse negativo. La microcriminalità sfugge alle risposte puramente muscolari in quanto è sospinta da necessità e urgenze che sono altrettanto forti. La strada è quella, a doppio senso, di non far sentire mai soli quelli che subiscono la microcriminalità e di intervenire sulle condizioni culturali ed economiche che creano emarginazione e innescano gli odiosi fenomeni microcriminali di rivalsa sulla società.<mark class="add-mark"> In questo senso occorre la creazione di un tavolo interistituzionale – con il Comune e le forze dell’ordine – per affrontare le segnalazioni dei cittadini, riconoscendo che non spetta a questi ultimi individuare a quale ente rivolgersi, ma alle istituzioni farsi carico delle domande emerse dal territorio, restituendo risposte concrete.</mark></div>
+</div>
+<div class="skip-row">── 1 proposta identica (sistema umanifatturiero) ──</div>
+<div class="skip-row">── 1 proposta identica (Milano Ristorazioni) ──</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Sostenere settori chiave per la vita cittadina ma in difficoltà, come la ristorazione. Permettendo di sospendere le sanzioni pecuniarie in cambio di una rapida risoluzione per piccole infrazioni.</p></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Rivedendo la messa a gara delle Cascine comunali per tutelare sia chi le gestisce da tempo sia la loro accessibilità per la cittadinanza.</p></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-del">I bandi vanno scritti e pensati anteponendo il valore sociale prodotto al valore economico atteso. <mark class="del-mark">Basta con le</mark> “spolverate di sociale” su grandi progetti <mark class="del-mark">immobiliari.</mark> Il rapporto va capovolto politicamente, usando tutti gli strumenti politici a disposizione e, prima di tutto, la volontà politica necessaria.</div>
+  <div class="cell cell-add">I bandi vanno scritti e pensati anteponendo il valore sociale prodotto al valore economico atteso. <mark class="add-mark">Le</mark> “spolverate di sociale” su grandi progetti <mark class="add-mark">immobiliari non vanno più accettate.</mark> Il rapporto va capovolto politicamente, usando tutti gli strumenti politici a disposizione e, prima di tutto, la volontà politica necessaria.</div>
+</div>
+  </div>
+</section>
+<section id="sfida8" class="doc-section">
+  <h2 class="section-title">Sfida 8 – Stagioni della vita / Scuola</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del">Tenere insieme <mark class="del-mark">le</mark> diverse stagioni della vita<mark class="del-mark">
+MILANO A CINQUE DIMENSIONI DI VIVIBILITA’</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">8. </mark>Tenere insieme <mark class="add-mark">la vivibilità nelle</mark> diverse stagioni della vita</div>
+</div>
+<div class="skip-row">── 1 proposta identica (asili nido) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Organizzare il tempo pieno e di supporto, utilizzando la buona struttura di edilizia scolastica e l’esperienza un po’ dimenticata delle Scuole Civiche che negli anni Sessanta e Settanta svolsero un’opera di alfabetizzazione della classe operaia immigrata dal Sud, principalmente con la legge sulle 150 ore cofinanziata da aziende e Stato.</div>
+  <div class="cell cell-add">Organizzare il tempo pieno e di supporto, utilizzando la buona struttura di edilizia scolastica e l’esperienza un po’ dimenticata delle Scuole Civiche che negli anni Sessanta e Settanta svolsero un’opera di alfabetizzazione della classe operaia immigrata dal Sud, principalmente con la legge sulle 150 ore cofinanziata da aziende e Stato.<mark class="add-mark"> Serve il ripristino immediato del contributo a Fondazione Milano al livello 2023, per poi avviare il percorso verso il riconoscimento come Politecnico delle Arti (L. 508/1999), stabilizzare il personale precario.</mark></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Prevedere un piano speciale per la scuola, migliorando il raccordo tra la scuola e i servizi sociali, riducendo il turnover degli insegnanti di sostegno e testando soluzioni innovative come il «case manager» scolastico, una figura interna per seguire le problematiche psicosociali ed educative più complesse. Sostenere «scuola natura» per permettere a tutti gli alunni esperienze più lunghe e più frequenti.</p></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Potenziare e rendere strutturale il progetto «scuole aperte per la città», valorizzando la scuola come spazio pubblico a disposizione della cittadinanza. Milano ha già un programma che coinvolge 89 istituti e 38.000 utenti: va reso strutturale, con ogni scuola delle zone ad alta dispersione aperta sette giorni su sette, dodici mesi all’anno, con governance condivisa tra scuola, comunità di quartiere e terzo settore. Per quattro mesi l’anno la scuola pubblica chiude: sono i mesi in cui le disuguaglianze si allargano di più.</p></div>
+</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><div class="subsection-new"><h3 class="subsection-title">LA SCUOLA COME INFRASTRUTTURA CIVILE <span class="badge badge-add">❆ nuova sottosezione</span></h3><p>Sezione interamente nuova nel 2.0 (circa 800 parole). Analisi della dispersione scolastica per quartiere (Comasina 23% vs Pagano 3,2%), taglio del contributo alle Scuole Civiche, e 5 proposte operative:</p><ul><li>Trasformare le Scuole Aperte in infrastruttura permanente (89 istituti, 38.000 utenti)</li><li>Istituire 27 Poli Civici Educativi entro il 2030 (modello Bildungsgrätzl viennesi)</li><li>Ripristinare e rilanciare le Scuole Civiche (Fondazione Milano → Politecnico delle Arti)</li><li>Aderire all’Associazione Internazionale delle Città Educative e UNESCO Learning Cities</li><li>Governare l’intelligenza artificiale a scuola</li></ul></div></div>
+</div>
+<div class="skip-row">── 3 proposte identiche (voto 16 anni, tavolo movida, case di quartiere) ──</div>
+<div class="diff-row">
+  <div class="cell cell-del">Studiare e sviluppare modelli pubblici di appartamenti assistiti per anziani ancora autosufficienti o parzialmente tali, che cercano sicurezza e socialità senza rinunciare all’indipendenza che offrano loro mini-alloggi, in complessi dedicati, dotati di barriere <mark class="del-mark">architettoiche</mark> ridotte e sistemi di emergenza e integrati da servizi come portineria, animazione, pulizie e supporto assistenziale leggero.</div>
+  <div class="cell cell-add">Studiare e sviluppare modelli pubblici di appartamenti assistiti per anziani ancora autosufficienti o parzialmente tali, che cercano sicurezza e socialità senza rinunciare all’indipendenza che offrano loro mini-alloggi, in complessi dedicati, dotati di barriere <mark class="add-mark">architettoniche</mark> ridotte e sistemi di emergenza e integrati da servizi come portineria, animazione, pulizie e supporto assistenziale leggero.</div>
+</div>
+  </div>
+</section>
+<section id="sfida9" class="doc-section">
+  <h2 class="section-title">Sfida 9 – Cultura, sport, saperi</h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-del"><mark class="del-mark">Far</mark> <mark class="del-mark">scorrere</mark> linfa vitale nel corpo della città<mark class="del-mark">
+SPORT POPOLARE, CULTURA DIFFUSA, SAPERI DEMOCRATICI</mark></div>
+  <div class="cell cell-add"><mark class="add-mark">9.</mark> <mark class="add-mark">Sport popolare, cultura diffusa, saperi democratici sono</mark> linfa vitale nel corpo della città</div>
+</div>
+<div class="skip-row">── 2 proposte identiche (assessorato cultura, affido culturale) ──</div>
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p>Sostenere l’editoria e l’offerta libraria indipendente, tutelando le librerie negli spazi comunali e non. Concepire le biblioteche comunali come una risorsa fondamentale per i territori, arricchendole con iniziative e provando ad estendere l’orario di apertura se frequentate da studenti.</p></div>
+</div>
+<div class="skip-row">── 2 proposte identiche (internazionalizzazione, sport di base) ──</div>
+  </div>
+</section>
+<section id="sfida10" class="doc-section">
+  <h2 class="section-title">Sfida 10 – Partecipazione e democrazia gestionale <span class="section-badge section-badge-new">NUOVA</span></h2>
+  <div class="section-body">
+<div class="diff-row">
+  <div class="cell cell-empty"><span class="badge badge-add">❆ nuovo</span></div>
+  <div class="cell cell-add"><p><strong>Sezione completamente nuova nel 2.0 &mdash; 6 proposte su partecipazione e democrazia gestionale:</strong></p><ol><li>Riforma del regolamento consiliare per garantire agibilità politica alla minoranza</li><li>Autonomia di bilancio significativa ai Municipi con funzioni delegate esclusive</li><li>Ridisegnare i Municipi per numero e confini (aggregazione 88 microzone studio 2014)</li><li>Ripristinare DUC, Comitati di quartiere, Consulte di funzione</li><li>Attuare lo Statuto della città metropolitana (elezione diretta sindaco metropolitano)</li><li>Valutare una «moneta metropolitana circolare» basata su stable coin/blockchain (modello Nantes)</li></ol></div>
+</div>
+  </div>
+</section>
+
+<footer>
+  <p>Documento generato il 7 maggio 2026 &middot; Hey Milano – Circolo e Centro Studi Emilio Caldara</p>
+  <p style="margin-top:6px">Confronto automatico tra versione 1.0 e versione 2.0 del documento politico</p>
+  <p style="margin-top:6px;font-style:italic">Le differenze intra-paragrafo sono evidenziate con difflib.SequenceMatcher a livello di parola</p>
+</footer>
+
+<script>
+
+  let identicalVisible = true;
+  function toggleIdentical() {
+    identicalVisible = !identicalVisible;
+    document.querySelectorAll('.skip-row').forEach(el => {
+      el.style.display = identicalVisible ? '' : 'none';
+    });
+    document.getElementById('toggleBtn').textContent = identicalVisible 
+      ? 'Nascondi paragrafi identici' 
+      : 'Mostra paragrafi identici';
+  }
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+</script>
+</body>
+</html>
