@@ -235,6 +235,7 @@ img { max-width: 100%; }
 .assemblea-status.confermata { color: var(--status-confermata); background: #EFF6FF; border-color: var(--status-confermata);}
 .assemblea-status.da-programmare { color: var(--status-da-programmare); background: var(--bg-soft); }
 .assemblea-status.annullata { color: var(--status-annullata); background: #FEF2F2; border-color: var(--status-annullata);}
+.assemblea-status.da-verificare { color: #92400E; background: #FFFBEB; border-color: #D97706; }
 
 .assemblea-contributi {
   grid-column: 1 / -1;

@@ -8,11 +8,12 @@
   if (!D) { console.error('HM_DATA non caricato'); return; }
 
   // ----- filtro vista -----
-  // Mostriamo solo le assemblee con data certa e stato Svolta o Confermata.
-  // Sono escluse quindi: le ipotesi "Da programmare", le voci con data null,
-  // le annullate. I dati grezzi restano in data.js: il filtro è solo a video.
+  // Mostriamo tutte le assemblee Svolta o Confermata, anche quelle senza data
+  // (bilaterali informali, riunioni ristrette senza data definita).
+  // Sono escluse: le "Da programmare" (ipotesi future) e le annullate.
+  // I dati grezzi restano in data.js: il filtro è solo a video.
   D.assemblee = D.assemblee.filter(a =>
-    a.data && (a.stato === 'Svolta' || a.stato === 'Confermata')
+    a.stato === 'Svolta' || a.stato === 'Confermata'
   );
 
   // ----- helpers -----
@@ -41,31 +42,29 @@
   const counts = {
     totale: D.assemblee.length,
     svolte: D.assemblee.filter(a => a.stato === 'Svolta').length,
-    confermate: D.assemblee.filter(a => a.stato === 'Confermata').length,
-    daProgrammare: D.assemblee.filter(a => a.stato === 'Da programmare').length,
-    annullate: D.assemblee.filter(a => a.stato === 'Annullata').length,
+    confermate: D.assemblee.filter(a => a.stato === 'Confermata' && !a.daVerificare).length,
+    daVerificare: D.assemblee.filter(a => a.daVerificare).length,
     contributi: D.contributi.length,
     promotori: new Set(D.assemblee.map(a => a.promotore).filter(Boolean)).size,
     temiAttivi: new Set(D.assemblee.flatMap(a => a.temi).concat(D.contributi.flatMap(c => c.temi))).size,
     sitoPubblicate: D.assemblee.filter(a => a.sito === 'Pubblicato').length
   };
-  const totaleProgrammate = counts.svolte + counts.confermate;
 
   const kpiHtml = `
     <div class="kpi dark">
-      <div class="kpi-label">Assemblee totali</div>
-      <div class="kpi-value">${counts.totale}</div>
-      <div class="kpi-meta">svolte e confermate</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Svolte</div>
-      <div class="kpi-value accent">${counts.svolte}</div>
-      <div class="kpi-meta">incontri già realizzati</div>
+      <div class="kpi-label">Assemblee svolte</div>
+      <div class="kpi-value">${counts.svolte}</div>
+      <div class="kpi-meta">incontri confermati realizzati</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Prossime in calendario</div>
-      <div class="kpi-value">${counts.confermate}</div>
-      <div class="kpi-meta">confermate, fino al Congresso</div>
+      <div class="kpi-value accent">${counts.confermate}</div>
+      <div class="kpi-meta">confermate fino al Congresso</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Da verificare</div>
+      <div class="kpi-value">${counts.daVerificare}</div>
+      <div class="kpi-meta">svoltesi ma in attesa di conferma</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Contributi raccolti</div>
@@ -117,12 +116,23 @@
       }
     });
 
-    // Top promotori
+    // Top realtà più attive (assemblee + contributi combinati)
     const promCount = {};
+
+    // Assemblee: conta per promotore (prende il primo soggetto se multipli con +//)
     D.assemblee.forEach(a => {
       const p = (a.promotore || 'Da definire').split(/\s*[+\/]\s*/)[0].trim();
       promCount[p] = (promCount[p] || 0) + 1;
     });
+
+    // Contributi: conta per fonte (prende il primo nome, esclude note parentetiche)
+    D.contributi.forEach(c => {
+      if (!c.fonte) return;
+      const f = c.fonte.split(/\s*[—,\/\(]\s*/)[0].trim();
+      if (!f) return;
+      promCount[f] = (promCount[f] || 0) + 1;
+    });
+
     const topProm = Object.entries(promCount).sort((a, b) => b[1] - a[1]).slice(0, 8);
     new Chart($('#chart-promotori'), {
       type: 'bar',
@@ -140,7 +150,12 @@
         indexAxis: 'y',
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: '#000', padding: 12, cornerRadius: 0, displayColors: false }
+          tooltip: {
+            backgroundColor: '#000', padding: 12, cornerRadius: 0, displayColors: false,
+            callbacks: {
+              label: ctx => `${ctx.raw} tra assemblee e contributi`
+            }
+          }
         },
         scales: {
           x: { grid: { color: '#E6E6E6' }, ticks: { stepSize: 1, font: { size: 11 } } },
@@ -153,17 +168,17 @@
   drawCharts();
 
   // ----- ASSEMBLEE LIST -----
-  // Mostriamo solo gli stati con almeno un'assemblea visibile (dopo il filtro iniziale).
-  const filterStati = ['Tutte', 'Svolta', 'Confermata'];
+  const filterStati = ['Tutte', 'Svolta', 'Confermata', 'Da verificare'];
   const filterBar = $('#filter-bar');
-  filterBar.innerHTML = filterStati.map((s, i) => `
-    <button class="filter-chip ${i === 0 ? 'active' : ''}" data-filter="${s}">
-      ${s} ${s === 'Tutte' ? `(${counts.totale})` : `(${
-        s === 'Svolta' ? counts.svolte :
-        s === 'Confermata' ? counts.confermate : 0
-      })`}
-    </button>
-  `).join('');
+  filterBar.innerHTML = filterStati.map((s, i) => {
+    let count;
+    if (s === 'Tutte') count = counts.totale;
+    else if (s === 'Svolta') count = counts.svolte;
+    else if (s === 'Confermata') count = counts.confermate;
+    else if (s === 'Da verificare') count = counts.daVerificare;
+    else count = 0;
+    return `<button class="filter-chip ${i === 0 ? 'active' : ''}" data-filter="${s}">${s} (${count})</button>`;
+  }).join('');
 
   const contribByAssemblea = {};
   D.contributi.forEach(c => {
@@ -182,7 +197,11 @@
 
   const renderAssembleeList = (filter = 'Tutte') => {
     const list = $('#assemblea-list');
-    const arr = filter === 'Tutte' ? D.assemblee : D.assemblee.filter(a => a.stato === filter);
+    let arr;
+    if (filter === 'Tutte') arr = D.assemblee;
+    else if (filter === 'Da verificare') arr = D.assemblee.filter(a => a.daVerificare);
+    else if (filter === 'Confermata') arr = D.assemblee.filter(a => a.stato === 'Confermata' && !a.daVerificare);
+    else arr = D.assemblee.filter(a => a.stato === filter);
     const sorted = sortAssemblee(arr);
     list.innerHTML = sorted.map(a => {
       const fd = fmtDate(a.data);
@@ -190,6 +209,8 @@
         ? `<div class="assemblea-date"><span class="day">${fd.day}</span><span class="month">${fd.month}</span></div>`
         : `<div class="assemblea-date tbd">Data<br>da definire</div>`;
       const stato = slug(a.stato);
+      const statoLabel = a.daVerificare ? 'Da verificare' : a.stato;
+      const statoClass = a.daVerificare ? 'da-verificare' : stato;
       const tags = (a.temi || []).map(t => `<span class="tag" style="border-color:${themeMap[t]||'#000'}">${t}</span>`).join('');
       const contribs = contribByAssemblea[a.url] || [];
       const contribBlock = contribs.length
@@ -215,7 +236,7 @@
             </div>
             ${tags ? `<div class="assemblea-tags">${tags}</div>` : ''}
           </div>
-          <div class="assemblea-status ${stato}">${a.stato}</div>
+          <div class="assemblea-status ${statoClass}">${statoLabel}</div>
           ${contribBlock}
         </article>
       `;
